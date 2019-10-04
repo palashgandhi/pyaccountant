@@ -1,0 +1,3 @@
+import pyaccountant
+
+pyaccountant.main()

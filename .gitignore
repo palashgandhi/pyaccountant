@@ -1,0 +1,11 @@
+# Tox directory
+/.tox
+
+# Coverage output
+/htmlcov
+/.coverage
+
+# Log files
+*.log
+
+*.pyc
