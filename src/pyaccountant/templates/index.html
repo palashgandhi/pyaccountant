@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<main>
+    <button id="link-btn" class="button button--is-primary">Connect with Plaid</button>
+    <div class="item-overview">
+        <div class="item-overview__column">
+            <h3 class="item-overview__heading">item_id</h3>
+            <p class="item-overview__id" id="item_id"></p>
+        </div>
+        <div class="item-overview__column">
+            <h3 class="item-overview__heading">access_token</h3>
+            <p class="item-overview__id" id="access_token"></p>
+        </div>
+
+        <div style="clear: both"></div>
+    </div>
+
+    <button id="transactions-btn" class="button button--is-primary">Show transactions</button>
+    <p id="transactions"></p>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+<script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
+<script>
+    (function ($) {
+        var products = '{{ plaid_products }}'.split(',');
+        if (products.includes('assets')) {
+            $('#assets').show();
+        }
+
+        var handler = Plaid.create({
+            apiVersion: 'v2',
+            clientName: 'Plaid Quickstart',
+            env: '{{ plaid_environment }}',
+            product: products,
+            key: '{{ plaid_public_key }}',
+            countryCodes: '{{ plaid_country_codes }}'.split(','),
+            onSuccess: function (public_token) {
+                $.post('/get_access_token', {
+                    public_token: public_token
+                }, function (data) {
+                    $('#item_id').text(data.item_id);
+                    $('#access_token').text(data.access_token);
+                    $('#container').fadeOut('fast', function () {
+                        $('#intro').hide();
+                        $('#app, #steps').fadeIn('slow');
+                    });
+                });
+            },
+        });
+
+        $('#link-btn').on('click', function (e) {
+            handler.open();
+        });
+
+        $('#transactions-btn').on('click', function (e) {
+            $.get('/get_transactions', function (data) {
+                $('#transactions').text(JSON.stringify(data, null, 4));
+            });
+        });
+    })(jQuery);
+
+    function qs(key) {
+        key = key.replace(/[*+?^$.\[\]{}()|\\\/]/g, "\\$&"); // escape RegEx meta chars
+        var match = location.search.match(new RegExp("[?&]" + key + "=([^&]+)(&|$)"));
+        return match && decodeURIComponent(match[1].replace(/\+/g, " "));
+    }
+
+    function displayError(element, error) {
+        var html = `
+    <div class="alert alert-danger">
+      <p><strong>Error Code:</strong> ${error.error_code}</p>
+      <p><strong>Error Type:</strong> ${error.error_type}</p>
+      <p><strong>Error Message:</strong> ${error.display_message == null ? error.error_message : error.display_message}</p>
+      <div>Check out our <a href="https://plaid.com/docs/#errors-overview">errors documentation</a> for more information.</div>
+    </div>`;
+        console.log(element);
+        console.log(html);
+        $(element).html(html).slideDown();
+    }
+</script>
+</body>
+</html>

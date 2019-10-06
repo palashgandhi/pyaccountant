@@ -22,9 +22,6 @@ def find_version(*file_paths):
 
 entrypoints = {"console_scripts": ["pyaccountant = pyaccountant.pyaccountant:main"]}
 setuptools.setup(
-    name="pyaccountant", version=find_version("src", "pyaccountant", "version.py")
-)
-setuptools.setup(
     name="pyaccountant",
     version=find_version("src", "pyaccountant", "version.py"),
     description="Make sense of your finances",
@@ -32,5 +29,5 @@ setuptools.setup(
     package=setuptools.find_packages(where="src"),
     include_package_data=True,
     entry_points=entrypoints,
-    install_requires=[""],
+    install_requires=["plaid-python==3.4.0", "flask==1.1.1"],
 )
