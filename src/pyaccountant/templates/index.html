@@ -14,7 +14,6 @@
 <script>
     (function ($) {
         var products = '{{ plaid_products }}'.split(',');
-
         var handler = Plaid.create({
             apiVersion: 'v2',
             clientName: 'PyAccountant',
@@ -22,6 +21,7 @@
             product: products,
             key: '{{ plaid_public_key }}',
             countryCodes: '{{ plaid_country_codes }}'.split(','),
+            // webhook: 'https://your-domain.tld/plaid-webhook',
             onSuccess: function (public_token) {
                 $.post('/initialize_plaid_item', {
                     public_token: public_token
@@ -37,7 +37,6 @@
         $('#link-btn').on('click', function (e) {
             handler.open();
         });
-
     })(jQuery);
 
     function qs(key) {
@@ -58,6 +57,7 @@
         console.log(html);
         $(element).html(html).slideDown();
     }
+
 </script>
 </body>
 </html>

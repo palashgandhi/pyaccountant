@@ -10,13 +10,6 @@ class PlaidItem(object):
         self.public_token = public_token
         self.access_token = access_token
         self.item_id = item_id
-        self.store_item_credentials()
-
-    def store_item_credentials(self):
-        """
-
-        :return:
-        """
         options.store_plaid_item_credentials(self)
 
     def get_identity(self, client):
@@ -82,8 +75,9 @@ class PlaidAccountant(object):
         self.client_id = '5d97d9a5f75ad900116dc7a6'
         self.public_key = '1ee26b4daa8011009b7c3d3cea4d58'
         self.secret = '17fcd7d3955fbc23b8012ff078af78'
-        self.country_codes = 'US,CA,GB,FR,ES'
         self.env = 'development'
+        self.country_codes = 'US,CA,GB,FR,ES'
+
         self.products = 'transactions'
         self.client = Client(
             client_id=self.client_id,
@@ -117,7 +111,7 @@ class PlaidAccountant(object):
 
     def get_plaid_item(self, item_id):
         """
-        Gets a plaid item from the list of connected items.
+        Returns a plaid item from the list of connected items.
 
         :param item_id:
         :return:
@@ -126,10 +120,7 @@ class PlaidAccountant(object):
             if item.item_id == item_id:
                 return item
 
-    def get_transactions(self, item_id):
-        return self.get_plaid_item(item_id).get_transactions(self.client)
-
     def get_transactions_of_all_items(self):
         all_transactions = []
         for item in self.plaid_items:
-            all_transactions.append(self.get_transactions(item.item_id))
+            all_transactions.append(item.get_transactions(self.client))

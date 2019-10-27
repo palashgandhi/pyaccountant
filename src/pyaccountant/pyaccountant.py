@@ -25,7 +25,7 @@ def create_parser():
 @app.route('/')
 def index():
     return flask.render_template(
-        'index.html',
+        "index.html",
         plaid_public_key=accountant.plaid_client.public_key,
         plaid_environment=accountant.plaid_client.env,
         plaid_products=accountant.plaid_client.products,
