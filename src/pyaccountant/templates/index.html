@@ -7,22 +7,6 @@
 <body>
 <main>
     <button id="link-btn" class="button button--is-primary">Connect with Plaid</button>
-    <div class="item-overview">
-        <div class="item-overview__column">
-            <h3 class="item-overview__heading">item_id</h3>
-            <p class="item-overview__id" id="item_id"></p>
-        </div>
-        <div class="item-overview__column">
-            <h3 class="item-overview__heading">access_token</h3>
-            <p class="item-overview__id" id="access_token"></p>
-        </div>
-
-        <div style="clear: both"></div>
-    </div>
-
-    <button id="transactions-btn" class="button button--is-primary">Show transactions</button>
-    <table id="transactions"></table>
-
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
@@ -30,9 +14,6 @@
 <script>
     (function ($) {
         var products = '{{ plaid_products }}'.split(',');
-        if (products.includes('assets')) {
-            $('#assets').show();
-        }
 
         var handler = Plaid.create({
             apiVersion: 'v2',
@@ -57,11 +38,6 @@
             handler.open();
         });
 
-        $('#transactions-btn').on('click', function (e) {
-            $.get('/get_transactions', function (data) {
-                $('#transactions').text(JSON.stringify(data, null, 4));
-            });
-        });
     })(jQuery);
 
     function qs(key) {

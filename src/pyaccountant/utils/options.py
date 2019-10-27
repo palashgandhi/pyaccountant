@@ -5,7 +5,8 @@ import os
 
 class PyAccountantOptions(object):
 
-    def store_plaid_item_credentials(self, plaid_item):
+    @staticmethod
+    def store_plaid_item_credentials(plaid_item):
         config = configparser.ConfigParser()
         defaults_file = os.path.abspath(os.path.join(__file__, "..", "..", "defaults.ini"))
         config.read(defaults_file)

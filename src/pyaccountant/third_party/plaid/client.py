@@ -80,8 +80,8 @@ class PlaidItem(object):
 class PlaidAccountant(object):
     def __init__(self):
         self.client_id = '5d97d9a5f75ad900116dc7a6'
-        self.secret = '17fcd7d3955fbc23b8012ff078af78'
         self.public_key = '1ee26b4daa8011009b7c3d3cea4d58'
+        self.secret = '17fcd7d3955fbc23b8012ff078af78'
         self.country_codes = 'US,CA,GB,FR,ES'
         self.env = 'development'
         self.products = 'transactions'
