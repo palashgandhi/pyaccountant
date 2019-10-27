@@ -1,6 +1,5 @@
 import codecs
 import os
-import re
 
 import setuptools
 
@@ -11,19 +10,10 @@ def read(*parts):
         return fp.read()
 
 
-def find_version(*file_paths):
-    version_file = read(*file_paths)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
-    if version_match:
-        return version_match.group(1)
-
-    raise RuntimeError("Unable to find version string")
-
-
 entrypoints = {"console_scripts": ["pyaccountant = pyaccountant.pyaccountant:main"]}
 setuptools.setup(
     name="pyaccountant",
-    version=find_version("src", "pyaccountant", "version.py"),
+    version="0.1.0",
     description="Make sense of your finances",
     package_dir={"": "src"},
     package=setuptools.find_packages(where="src"),

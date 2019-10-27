@@ -1,6 +1,7 @@
 import argparse
 
 import flask
+
 from pyaccountant.third_party.plaid import client
 
 app = flask.Flask(__name__)
@@ -17,12 +18,12 @@ def create_parser():
         "-p",
         "--port",
         default="5000",
-        help="The port that the flask app should use. (Default: '{}')".format(5000)
+        help="The port that the flask app should use. (Default: '{}')".format(5000),
     )
     return parser
 
 
-@app.route('/')
+@app.route("/")
 def index():
     return flask.render_template(
         "index.html",
@@ -33,10 +34,10 @@ def index():
     )
 
 
-@app.route("/initialize_plaid_item", methods=['POST'])
+@app.route("/initialize_plaid_item", methods=["POST"])
 def initialize_plaid_item():
-    accountant.plaid_client.get_access_token(flask.request.form['public_token'])
-    return '', 204
+    accountant.plaid_client.get_access_token(flask.request.form["public_token"])
+    return "", 204
 
 
 @app.route("/dashboard")

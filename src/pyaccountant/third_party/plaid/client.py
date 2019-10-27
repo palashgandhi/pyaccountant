@@ -1,7 +1,7 @@
 import datetime
 
-from plaid import Client
-from plaid import errors
+from plaid import Client, errors
+
 from pyaccountant.utils.options import options
 
 
@@ -22,8 +22,14 @@ class PlaidItem(object):
         try:
             identity_response = client.Identity.get(self.access_token)
         except errors.PlaidError as e:
-            return {'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type}}
-        return {'error': None, 'identity': identity_response}
+            return {
+                "error": {
+                    "display_message": e.display_message,
+                    "error_code": e.code,
+                    "error_type": e.type,
+                }
+            }
+        return {"error": None, "identity": identity_response}
 
     def get_balance(self, client):
         """
@@ -35,8 +41,14 @@ class PlaidItem(object):
         try:
             balance_response = client.Accounts.balance.get(self.access_token)
         except errors.PlaidError as e:
-            return {'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type}}
-        return {'error': None, 'balance': balance_response}
+            return {
+                "error": {
+                    "display_message": e.display_message,
+                    "error_code": e.code,
+                    "error_type": e.type,
+                }
+            }
+        return {"error": None, "balance": balance_response}
 
     def get_accounts(self, client):
         """
@@ -48,8 +60,14 @@ class PlaidItem(object):
         try:
             accounts_response = client.Accounts.get(self.access_token)
         except errors.PlaidError as e:
-            return {'error': {'display_message': e.display_message, 'error_code': e.code, 'error_type': e.type}}
-        return {'error': None, 'accounts': accounts_response}
+            return {
+                "error": {
+                    "display_message": e.display_message,
+                    "error_code": e.code,
+                    "error_type": e.type,
+                }
+            }
+        return {"error": None, "accounts": accounts_response}
 
     def get_transactions(self, client, start_date=None, end_date=None):
         """
@@ -60,25 +78,29 @@ class PlaidItem(object):
         """
         if not start_date:
             # Pull transactions for the last 30 days
-            start_date = '{:%Y-%m-%d}'.format(datetime.datetime.now() + datetime.timedelta(-30))
+            start_date = "{:%Y-%m-%d}".format(
+                datetime.datetime.now() + datetime.timedelta(-30)
+            )
         if not end_date:
-            end_date = '{:%Y-%m-%d}'.format(datetime.datetime.now())
+            end_date = "{:%Y-%m-%d}".format(datetime.datetime.now())
         try:
-            transactions_response = client.Transactions.get(self.access_token, start_date, end_date)
+            transactions_response = client.Transactions.get(
+                self.access_token, start_date, end_date
+            )
         except errors.PlaidError as e:
             raise e
-        return {'error': None, 'transactions': transactions_response}
+        return {"error": None, "transactions": transactions_response}
 
 
 class PlaidAccountant(object):
     def __init__(self):
-        self.client_id = '5d97d9a5f75ad900116dc7a6'
-        self.public_key = '1ee26b4daa8011009b7c3d3cea4d58'
-        self.secret = '17fcd7d3955fbc23b8012ff078af78'
-        self.env = 'development'
-        self.country_codes = 'US,CA,GB,FR,ES'
+        self.client_id = "5d97d9a5f75ad900116dc7a6"
+        self.public_key = "1ee26b4daa8011009b7c3d3cea4d58"
+        self.secret = "17fcd7d3955fbc23b8012ff078af78"
+        self.env = "development"
+        self.country_codes = "US,CA,GB,FR,ES"
 
-        self.products = 'transactions'
+        self.products = "transactions"
         self.client = Client(
             client_id=self.client_id,
             secret=self.secret,
@@ -105,7 +127,7 @@ class PlaidAccountant(object):
         item = self.client.Item.get(exchange_response["access_token"])
         self.plaid_items.append(
             PlaidItem(
-                public_token, exchange_response["access_token"], item['item']['item_id']
+                public_token, exchange_response["access_token"], item["item"]["item_id"]
             )
         )
 
