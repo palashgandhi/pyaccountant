@@ -234,3 +234,42 @@ def format_error(e):
 
 if __name__ == '__main__':
     app.run(port=os.getenv('PORT', 5000))
+    a = {
+        'account_id': 'JPB6XjarvqudmPokPDnBHpxx8VzAP7HbDakJ5',
+        'account_owner': None,
+        'amount': 14.27,
+        'category': [
+            'Travel',
+            'Car Service',
+            'Ride Share'
+        ],
+        'category_id': '22006001',
+        'date': '2019-10-20',
+        'iso_currency_code': 'USD',
+        'location': {
+            'address': None,
+            'city': None,
+            'country': None,
+            'lat': None,
+            'lon': None,
+            'postal_code': None,
+            'region': None,
+            'store_number': None
+        },
+        'name': 'UBR* PENDING.UBER.COM',
+        'payment_meta': {
+            'by_order_of': None,
+            'payee': None,
+            'payer': None,
+            'payment_method': None,
+            'payment_processor': None,
+            'ppd_id': None,
+            'reason': None,
+            'reference_number': None
+        },
+        'pending': True,
+        'pending_transaction_id': None,
+        'transaction_id': 'eE71zLVxqRs8V9aK9LNghMzOnJYdBLUdgPa63',
+        'transaction_type': 'special',
+        'unofficial_currency_code': None
+    }

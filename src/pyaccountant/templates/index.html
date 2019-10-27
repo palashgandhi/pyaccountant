@@ -21,7 +21,7 @@
     </div>
 
     <button id="transactions-btn" class="button button--is-primary">Show transactions</button>
-    <p id="transactions"></p>
+    <table id="transactions"></table>
 
 </main>
 
@@ -36,17 +36,15 @@
 
         var handler = Plaid.create({
             apiVersion: 'v2',
-            clientName: 'Plaid Quickstart',
+            clientName: 'PyAccountant',
             env: '{{ plaid_environment }}',
             product: products,
             key: '{{ plaid_public_key }}',
             countryCodes: '{{ plaid_country_codes }}'.split(','),
             onSuccess: function (public_token) {
-                $.post('/get_access_token', {
+                $.post('/initialize_plaid_item', {
                     public_token: public_token
                 }, function (data) {
-                    $('#item_id').text(data.item_id);
-                    $('#access_token').text(data.access_token);
                     $('#container').fadeOut('fast', function () {
                         $('#intro').hide();
                         $('#app, #steps').fadeIn('slow');
