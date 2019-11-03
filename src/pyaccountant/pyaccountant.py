@@ -25,8 +25,10 @@ def create_parser():
 
 @app.route("/")
 def index():
+    all_plaid_transactions = accountant.plaid_client.get_transactions_of_all_items()
     return flask.render_template(
         "index.html",
+        all_plaid_transactions=all_plaid_transactions,
         plaid_public_key=accountant.plaid_client.public_key,
         plaid_environment=accountant.plaid_client.env,
         plaid_products=accountant.plaid_client.products,
@@ -37,14 +39,7 @@ def index():
 @app.route("/initialize_plaid_item", methods=["POST"])
 def initialize_plaid_item():
     accountant.plaid_client.get_access_token(flask.request.form["public_token"])
-    return "", 204
-
-
-@app.route("/dashboard")
-def dashboard():
-    all_plaid_transactions = accountant.plaid_client.get_transactions_of_all_items()
-    print(all_plaid_transactions)
-    return flask.jsonify(all_plaid_transactions)
+    return flask.redirect(flask.url_for('index'))
 
 
 def main():
