@@ -4,12 +4,14 @@
     <meta charset="UTF-8">
     <title>Title</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
 </head>
 <body>
 <main>
     <button id="link-btn" class="btn btn-primary button--is-primary">Add a new account</button>
+    {% set accounts_map = {} %}
     <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-bordered" id="accounts-table" width="100%" cellspacing="0">
             <thead class="thead-dark">
                 <tr>
                     <th scope="col">Name</th>
@@ -18,11 +20,11 @@
                 </tr>
             </thead>
             <tbody>
-                {% for plaid_item in all_plaid_transactions %}
-                    {% set item_id = plaid_item["item_id"] %}
-                    {% for account in plaid_item["accounts"] %}
+                {% for account in all_plaid_accounts %}
+                    {% if account["account_id"] is not none %}
+                        {% do accounts_map.update({account["account_id"]: account["official_name"] }) %}
                         <tr>
-                            <td>{{ account["name"] }} - {{ account["mask"] }}</td>
+                            <td>{{ account["official_name"] }} - {{ account["mask"] }}</td>
                             <td>{{ account["subtype"] }}</td>
                             <td>
                                 {{ account["balances"]["current"] }}
@@ -31,8 +33,39 @@
                                 {% endif %}
                             </td>
                         </tr>
-                    {% endfor %}
+                    {% endif %}
                 {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <hr>
+    <hr>
+
+    <div class="table-responsive">
+        <table class="table table-bordered" id="transactions-table" width="100%" cellspacing="0">
+            <thead class="thead-dark">
+            <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Date</th>
+                <th scope="col">Amount</th>
+                <th scope="col">Category</th>
+                <th scope="col">Account</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for plaid_item in all_plaid_transactions %}
+                {% set item_id = plaid_item["item_id"] %}
+                {% for transaction in plaid_item["transactions"] %}
+                    <tr>
+                        <td>{{ transaction["name"] }}</td>
+                        <td>{{ transaction["date"] }}</td>
+                        <td>{{ transaction["amount"] }}</td>
+                        <td>{{ transaction["category"] | join(", ") }}</td>
+                        <td>{{ accounts_map[transaction["account_id"]] }}</td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
             </tbody>
         </table>
     </div>
@@ -42,6 +75,7 @@
 <script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+<script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
 
 <script>
     (function ($) {
@@ -89,6 +123,13 @@
         console.log(html);
         $(element).html(html).slideDown();
     }
+
+    $(document).ready(function() {
+        $('#accounts-table').DataTable();
+        $('#transactions-table').DataTable({
+            "order": [[ 1, "desc" ]]
+        });
+    });
 
 </script>
 </body>

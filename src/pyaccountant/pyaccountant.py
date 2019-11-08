@@ -25,9 +25,11 @@ def create_parser():
 
 @app.route("/")
 def index():
+    all_plaid_accounts = accountant.plaid_client.get_accounts_of_all_items()
     all_plaid_transactions = accountant.plaid_client.get_transactions_of_all_items()
     return flask.render_template(
         "index.html",
+        all_plaid_accounts=all_plaid_accounts,
         all_plaid_transactions=all_plaid_transactions,
         plaid_public_key=accountant.plaid_client.public_key,
         plaid_environment=accountant.plaid_client.env,
@@ -45,6 +47,7 @@ def initialize_plaid_item():
 def main():
     parser = create_parser()
     args = parser.parse_args()
+    app.jinja_env.add_extension('jinja2.ext.do')
     app.run(port=args.port)
 
 

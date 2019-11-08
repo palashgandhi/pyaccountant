@@ -6,15 +6,18 @@ from pyaccountant.utils.options import options
 
 
 class PlaidItem(object):
-    def __init__(self, public_token, access_token, item_id):
+    def __init__(self, plaid_client, public_token, access_token, item_id):
+        self.plaid_client = plaid_client
         self.public_token = public_token
         self.access_token = access_token
         self.item_id = item_id
+        self.institution_id = plaid_client.Item.get(access_token)["item"]["institution_id"]
+        self.institution_name = plaid_client.Institutions.get_by_id(self.institution_id)["institution"]["name"]
 
     def save_plaid_item_credentials(self):
         options.store_plaid_item_credentials(self)
 
-    def get_identity(self, client):
+    def get_identity(self):
         """
         Retrieve Identity data for an Item
         https://plaid.com/docs/#identity
@@ -22,18 +25,18 @@ class PlaidItem(object):
         :return:
         """
         try:
-            identity_response = client.Identity.get(self.access_token)
+            identity_response = self.plaid_client.Identity.get(self.access_token)
         except errors.PlaidError as e:
-            return {
+            raise Exception({
                 "error": {
                     "display_message": e.display_message,
                     "error_code": e.code,
                     "error_type": e.type,
                 }
-            }
+            })
         return {"error": None, "identity": identity_response}
 
-    def get_balance(self, client):
+    def get_balance(self):
         """
         Retrieve real-time balance data for each of an Item's accounts
         https://plaid.com/docs/#balance
@@ -41,18 +44,18 @@ class PlaidItem(object):
         :return:
         """
         try:
-            balance_response = client.Accounts.balance.get(self.access_token)
+            balance_response = self.plaid_client.Accounts.balance.get(self.access_token)
         except errors.PlaidError as e:
-            return {
+            raise Exception({
                 "error": {
                     "display_message": e.display_message,
                     "error_code": e.code,
                     "error_type": e.type,
                 }
-            }
+            })
         return {"error": None, "balance": balance_response}
 
-    def get_accounts(self, client):
+    def get_accounts(self):
         """
         Retrieve an Item's accounts
         https://plaid.com/docs/#accounts
@@ -60,20 +63,19 @@ class PlaidItem(object):
         :return:
         """
         try:
-            accounts_response = client.Accounts.get(self.access_token)
+            accounts_response = self.plaid_client.Accounts.get(self.access_token)
         except errors.PlaidError as e:
-            return {
+            raise Exception({
                 "error": {
                     "display_message": e.display_message,
                     "error_code": e.code,
                     "error_type": e.type,
                 }
-            }
-        return {"error": None, "accounts": accounts_response}
+            })
+        return accounts_response["accounts"]
 
     def get_transactions(
         self,
-        client,
         start_date="{:%Y-%m-%d}".format(datetime.datetime.now() + datetime.timedelta(-30)),
         end_date="{:%Y-%m-%d}".format(datetime.datetime.now())
     ):
@@ -83,8 +85,8 @@ class PlaidItem(object):
 
         :return:
         """
-        print("Fetching transactions for item {} from {} to {}...".format(self.item_id, start_date, end_date))
-        return client.Transactions.get(
+        print("Fetching transactions for item {} from {} to {}...".format(self.institution_name, start_date, end_date))
+        return self.plaid_client.Transactions.get(
             self.access_token, start_date, end_date
         )
 
@@ -104,7 +106,7 @@ class PlaidAccountant(object):
             public_key=self.public_key,
             environment=self.env,
         )
-        self.plaid_items = []
+        self.plaid_items = set()
         self.get_existing_plaid_items_from_credentials_file()
 
     def get_access_token(self, public_token):
@@ -124,10 +126,10 @@ class PlaidAccountant(object):
 
         item = self.client.Item.get(exchange_response["access_token"])
         plaid_item = PlaidItem(
-            public_token, exchange_response["access_token"], item["item"]["item_id"]
+            self.client, public_token, exchange_response["access_token"], item["item"]["item_id"]
         )
         plaid_item.save_plaid_item_credentials()
-        self.plaid_items.append(plaid_item)
+        self.plaid_items.add(plaid_item)
 
     def get_plaid_item(self, item_id):
         """
@@ -140,10 +142,19 @@ class PlaidAccountant(object):
             if item.item_id == item_id:
                 return item
 
+    def get_accounts_of_all_items(self):
+        """
+        Returns all the accounts of all plaid items.
+        """
+        accounts = []
+        for item in self.plaid_items:
+            accounts.extend(item.get_accounts())
+        return accounts
+
     def get_transactions_of_all_items(self):
         all_transactions = []
         for item in self.plaid_items:
-            transactions = item.get_transactions(self.client)
+            transactions = item.get_transactions()
             transactions["item_id"] = item.item_id
             all_transactions.append(transactions)
         return all_transactions
@@ -153,8 +164,8 @@ class PlaidAccountant(object):
         if existing_items is None:
             return None
         for item in existing_items:
-            self.plaid_items.append(
+            self.plaid_items.add(
                 PlaidItem(
-                    item["public_token"], item["access_token"], item["id"]
+                    self.client, item["public_token"], item["access_token"], item["id"]
                 )
             )
