@@ -41,13 +41,13 @@ def index():
 @app.route("/initialize_plaid_item", methods=["POST"])
 def initialize_plaid_item():
     accountant.plaid_client.get_access_token(flask.request.form["public_token"])
-    return flask.redirect(flask.url_for('index'))
+    return flask.redirect(flask.url_for("index"))
 
 
 def main():
     parser = create_parser()
     args = parser.parse_args()
-    app.jinja_env.add_extension('jinja2.ext.do')
+    app.jinja_env.add_extension("jinja2.ext.do")
     app.run(port=args.port)
 
 

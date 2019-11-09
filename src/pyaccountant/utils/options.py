@@ -4,7 +4,6 @@ import os
 
 
 class PyAccountantOptions(object):
-
     def __init__(self):
         self.config = configparser.ConfigParser()
         defaults_file = os.path.abspath(
@@ -22,7 +21,11 @@ class PyAccountantOptions(object):
         if credentials_file_exists:
             with open(credentials_file_path, "r") as credentials_file:
                 credentials = json.load(credentials_file)
-        print("Saving plaid item credentials for {} to {}".format(plaid_item.item_id, credentials_file_path))
+        print(
+            "Saving plaid item credentials for {} to {}".format(
+                plaid_item.item_id, credentials_file_path
+            )
+        )
         with open(credentials_file_path, "w+") as credentials_file:
             if "plaid_items" not in credentials:
                 credentials["plaid_items"] = []
@@ -40,7 +43,11 @@ class PyAccountantOptions(object):
         credentials_file_path = self.get_option("PLAID", "CREDENTIALS_JSON_PATH")
         if not os.path.exists(credentials_file_path):
             return None
-        print("Reading all existing plaid items from credentials file at {}".format(credentials_file_path))
+        print(
+            "Reading all existing plaid items from credentials file at {}".format(
+                credentials_file_path
+            )
+        )
         with open(credentials_file_path, "r") as credentials_file:
             return json.load(credentials_file)["plaid_items"]
 

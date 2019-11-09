@@ -11,8 +11,12 @@ class PlaidItem(object):
         self.public_token = public_token
         self.access_token = access_token
         self.item_id = item_id
-        self.institution_id = plaid_client.Item.get(access_token)["item"]["institution_id"]
-        self.institution_name = plaid_client.Institutions.get_by_id(self.institution_id)["institution"]["name"]
+        self.institution_id = plaid_client.Item.get(access_token)["item"][
+            "institution_id"
+        ]
+        self.institution_name = plaid_client.Institutions.get_by_id(
+            self.institution_id
+        )["institution"]["name"]
 
     def save_plaid_item_credentials(self):
         """
@@ -30,13 +34,15 @@ class PlaidItem(object):
         try:
             identity_response = self.plaid_client.Identity.get(self.access_token)
         except errors.PlaidError as e:
-            raise Exception({
-                "error": {
-                    "display_message": e.display_message,
-                    "error_code": e.code,
-                    "error_type": e.type,
+            raise Exception(
+                {
+                    "error": {
+                        "display_message": e.display_message,
+                        "error_code": e.code,
+                        "error_type": e.type,
+                    }
                 }
-            })
+            )
         return {"error": None, "identity": identity_response}
 
     def get_balance(self):
@@ -49,13 +55,15 @@ class PlaidItem(object):
         try:
             balance_response = self.plaid_client.Accounts.balance.get(self.access_token)
         except errors.PlaidError as e:
-            raise Exception({
-                "error": {
-                    "display_message": e.display_message,
-                    "error_code": e.code,
-                    "error_type": e.type,
+            raise Exception(
+                {
+                    "error": {
+                        "display_message": e.display_message,
+                        "error_code": e.code,
+                        "error_type": e.type,
+                    }
                 }
-            })
+            )
         return {"error": None, "balance": balance_response}
 
     def get_accounts(self):
@@ -81,7 +89,11 @@ class PlaidItem(object):
         :return: The transactions of each account in this item.
         :rtyppe: ```dict``
         """
-        print("Fetching transactions for item {} from {} to {}...".format(self.institution_name, start_date, end_date))
+        print(
+            "Fetching transactions for item {} from {} to {}...".format(
+                self.institution_name, start_date, end_date
+            )
+        )
         return self.plaid_client.Transactions.get(
             self.access_token, start_date, end_date
         )
@@ -122,7 +134,10 @@ class PlaidAccountant(object):
 
         item = self.client.Item.get(exchange_response["access_token"])
         plaid_item = PlaidItem(
-            self.client, public_token, exchange_response["access_token"], item["item"]["item_id"]
+            self.client,
+            public_token,
+            exchange_response["access_token"],
+            item["item"]["item_id"],
         )
         plaid_item.save_plaid_item_credentials()
         self.plaid_items.add(plaid_item)
@@ -154,8 +169,10 @@ class PlaidAccountant(object):
 
     def get_transactions_of_all_items(
         self,
-        start_date="{:%Y-%m-%d}".format(datetime.datetime.now() + datetime.timedelta(-30)),
-        end_date="{:%Y-%m-%d}".format(datetime.datetime.now())
+        start_date="{:%Y-%m-%d}".format(
+            datetime.datetime.now() + datetime.timedelta(-30)
+        ),
+        end_date="{:%Y-%m-%d}".format(datetime.datetime.now()),
     ):
         """
         Returns the transactions of all items.
