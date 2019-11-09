@@ -22,9 +22,13 @@
             <tbody>
                 {% for account in all_plaid_accounts %}
                     {% if account["account_id"] is not none %}
-                        {% do accounts_map.update({account["account_id"]: account["official_name"] }) %}
+                        {% set account_name = account["official_name"] %}
+                        {% if account["official_name"] is none %}
+                            {% set account_name = account["name"] %}
+                        {% endif %}
+                        {% do accounts_map.update({account["account_id"]: account_name }) %}
                         <tr>
-                            <td>{{ account["official_name"] }} - {{ account["mask"] }}</td>
+                            <td>{{ account_name }} - {{ account["mask"] }}</td>
                             <td>{{ account["subtype"] }}</td>
                             <td>
                                 {{ account["balances"]["current"] }}

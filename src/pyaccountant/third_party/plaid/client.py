@@ -15,6 +15,9 @@ class PlaidItem(object):
         self.institution_name = plaid_client.Institutions.get_by_id(self.institution_id)["institution"]["name"]
 
     def save_plaid_item_credentials(self):
+        """
+        Saves the plaid Item credentials in the credentials file.
+        """
         options.store_plaid_item_credentials(self)
 
     def get_identity(self):
@@ -60,30 +63,23 @@ class PlaidItem(object):
         Retrieve an Item's accounts
         https://plaid.com/docs/#accounts
 
-        :return:
+        :return: The list of dictionaries of each account in current item.
+        :rtype: ``list`` of ``dict``
         """
-        try:
-            accounts_response = self.plaid_client.Accounts.get(self.access_token)
-        except errors.PlaidError as e:
-            raise Exception({
-                "error": {
-                    "display_message": e.display_message,
-                    "error_code": e.code,
-                    "error_type": e.type,
-                }
-            })
-        return accounts_response["accounts"]
+        print("Fetching accounts for item {}.".format(self.institution_name))
+        return self.plaid_client.Accounts.get(self.access_token)["accounts"]
 
-    def get_transactions(
-        self,
-        start_date="{:%Y-%m-%d}".format(datetime.datetime.now() + datetime.timedelta(-30)),
-        end_date="{:%Y-%m-%d}".format(datetime.datetime.now())
-    ):
+    def get_transactions(self, start_date, end_date):
         """
         Retrieve Transactions for an Item
         https://plaid.com/docs/#transactions
 
-        :return:
+        :param start_date: The date from which to fetch the transactions in the YYYY-MM-DD format.
+        :type start_date: ``str``
+        :param end_date: The date to which to fetch the transactions in the YYYY-MM-DD format.
+        :type end_date: ``str``
+        :return: The transactions of each account in this item.
+        :rtyppe: ```dict``
         """
         print("Fetching transactions for item {} from {} to {}...".format(self.institution_name, start_date, end_date))
         return self.plaid_client.Transactions.get(
@@ -107,7 +103,7 @@ class PlaidAccountant(object):
             environment=self.env,
         )
         self.plaid_items = set()
-        self.get_existing_plaid_items_from_credentials_file()
+        self.initialize_existing_plaid_items_from_credentials_file()
 
     def get_access_token(self, public_token):
         """
@@ -135,8 +131,10 @@ class PlaidAccountant(object):
         """
         Returns a plaid item from the list of connected items.
 
-        :param item_id:
-        :return:
+        :param item_id: The Item ID.
+        :type item_id: ``str``
+        :return: The Item object corresponding to the ID.
+        :rtype: :py:class:`Item`
         """
         for item in self.plaid_items:
             if item.item_id == item_id:
@@ -145,21 +143,41 @@ class PlaidAccountant(object):
     def get_accounts_of_all_items(self):
         """
         Returns all the accounts of all plaid items.
+
+        :return: List of accounts of each known item.
+        :rtype: ``list`` of ``dict``
         """
         accounts = []
         for item in self.plaid_items:
             accounts.extend(item.get_accounts())
         return accounts
 
-    def get_transactions_of_all_items(self):
+    def get_transactions_of_all_items(
+        self,
+        start_date="{:%Y-%m-%d}".format(datetime.datetime.now() + datetime.timedelta(-30)),
+        end_date="{:%Y-%m-%d}".format(datetime.datetime.now())
+    ):
+        """
+        Returns the transactions of all items.
+
+        :param start_date: The date from which to fetch the transactions in the YYYY-MM-DD format.
+        :type start_date: ``str``
+        :param end_date: The date to which to fetch the transactions in the YYYY-MM-DD format.
+        :type end_date: ``str``
+        :return: The list of transactions of each item.
+        :rtyppe: ``list`` of ``dict``
+        """
         all_transactions = []
         for item in self.plaid_items:
-            transactions = item.get_transactions()
+            transactions = item.get_transactions(start_date, end_date)
             transactions["item_id"] = item.item_id
             all_transactions.append(transactions)
         return all_transactions
 
-    def get_existing_plaid_items_from_credentials_file(self):
+    def initialize_existing_plaid_items_from_credentials_file(self):
+        """
+        Parses the credentials file and initializes the Item objects for each item in the file.
+        """
         existing_items = options.get_existing_plaid_item_credentials()
         if existing_items is None:
             return None

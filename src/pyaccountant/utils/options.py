@@ -4,15 +4,19 @@ import os
 
 
 class PyAccountantOptions(object):
-    @staticmethod
-    def store_plaid_item_credentials(plaid_item):
-        config = configparser.ConfigParser()
+
+    def __init__(self):
+        self.config = configparser.ConfigParser()
         defaults_file = os.path.abspath(
             os.path.join(__file__, "..", "..", "defaults.ini")
         )
-        config.read(defaults_file)
+        self.config.read(defaults_file)
 
-        credentials_file_path = config.get("PLAID", "CREDENTIALS_JSON_PATH")
+    def get_option(self, section, key):
+        return self.config.get(section, key)
+
+    def store_plaid_item_credentials(self, plaid_item):
+        credentials_file_path = self.get_option("PLAID", "CREDENTIALS_JSON_PATH")
         credentials_file_exists = os.path.exists(credentials_file_path)
         credentials = {}
         if credentials_file_exists:
@@ -32,15 +36,8 @@ class PyAccountantOptions(object):
                 )
             json.dump(credentials, credentials_file)
 
-    @staticmethod
-    def get_existing_plaid_item_credentials():
-        config = configparser.ConfigParser()
-        defaults_file = os.path.abspath(
-            os.path.join(__file__, "..", "..", "defaults.ini")
-        )
-        config.read(defaults_file)
-
-        credentials_file_path = config.get("PLAID", "CREDENTIALS_JSON_PATH")
+    def get_existing_plaid_item_credentials(self):
+        credentials_file_path = self.get_option("PLAID", "CREDENTIALS_JSON_PATH")
         if not os.path.exists(credentials_file_path):
             return None
         print("Reading all existing plaid items from credentials file at {}".format(credentials_file_path))
