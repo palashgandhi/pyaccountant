@@ -2,7 +2,7 @@ from pyaccountant import pyaccountant
 
 
 class TestOrchestrator(object):
-    def setup(self):
+    def __init__(self):
         pyaccountant.app.config["TESTING"] = True
         pyaccountant.app.config["WTF_CSRF_ENABLED"] = False
         pyaccountant.app.config["DEBUG"] = False
@@ -15,7 +15,6 @@ class TestOrchestrator(object):
 def test_main_page():
     orchestrator = TestOrchestrator()
     try:
-        orchestrator.setup()
         response = orchestrator.app.get("/", follow_redirects=True)
         assert response.status_code == 200
     finally:

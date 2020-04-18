@@ -11,10 +11,25 @@ class PyAccountantOptions(object):
         )
         self.config.read(defaults_file)
 
-    def get_option(self, section, key):
-        return self.config.get(section, key)
+    def get_option(self, section, option):
+        """
+        Returns the value of the key from the section.
+
+        :param section: The section in which to look for.
+        :type section: ``str``
+        :param option: The option to fetch.
+        :type option: ``str``
+        :return: The option value.
+        :rtype: ``str``
+        """
+        return self.config.get(section, option)
 
     def store_plaid_item_credentials(self, plaid_item):
+        """
+        Stores the plaid credentials of an item
+        :param plaid_item:
+        :return:
+        """
         credentials_file_path = self.get_option("PLAID", "CREDENTIALS_JSON_PATH")
         credentials_file_exists = os.path.exists(credentials_file_path)
         credentials = {}

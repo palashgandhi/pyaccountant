@@ -5,6 +5,7 @@ import flask
 from pyaccountant.third_party.plaid import client
 
 app = flask.Flask(__name__)
+app.jinja_env.add_extension("jinja2.ext.do")
 
 
 class PyAccountant(object):
@@ -13,7 +14,7 @@ class PyAccountant(object):
 
 
 def create_parser():
-    parser = argparse.ArgumentParser(description="Start pyaccountant locally")
+    parser = argparse.ArgumentParser(description="Start pyaccountant")
     parser.add_argument(
         "-p",
         "--port",
@@ -47,7 +48,6 @@ def initialize_plaid_item():
 def main():
     parser = create_parser()
     args = parser.parse_args()
-    app.jinja_env.add_extension("jinja2.ext.do")
     app.run(port=args.port)
 
 
