@@ -5,73 +5,90 @@
     <title>Title</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+
 </head>
 <body>
 <main>
-    <button id="link-btn" class="btn btn-primary button--is-primary">Add a new account</button>
-    {% set accounts_map = {} %}
-    <div class="table-responsive">
-        <table class="table table-bordered" id="accounts-table" width="100%" cellspacing="0">
-            <thead class="thead-dark">
-                <tr>
-                    <th scope="col">Name</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Balance</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for account in all_plaid_accounts %}
-                    {% if account["account_id"] is not none %}
-                        {% set account_name = account["official_name"] %}
-                        {% if account["official_name"] is none %}
-                            {% set account_name = account["name"] %}
-                        {% endif %}
-                        {% do accounts_map.update({account["account_id"]: account_name }) %}
+    <div class="container">
+        <button id="link-btn" class="btn btn-primary button--is-primary">Add a new account</button>
+        {% set accounts_map = {} %}
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="accounts-table" width="100%" cellspacing="0">
+                    <thead class="thead-dark">
                         <tr>
-                            <td>{{ account_name }} - {{ account["mask"] }}</td>
-                            <td>{{ account["subtype"] }}</td>
-                            <td>
-                                {{ account["balances"]["current"] }}
-                                {% if account["type"] not in ["depository"] %}
-                                    / {{ account["balances"]["limit"] }}
-                                {% endif %}
-                            </td>
+                            <th scope="col">Name</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Subtype</th>
+                            <th scope="col">Balance</th>
                         </tr>
-                    {% endif %}
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <hr>
-    <hr>
-
-    <div class="table-responsive">
-        <table class="table table-bordered" id="transactions-table" width="100%" cellspacing="0">
-            <thead class="thead-dark">
-            <tr>
-                <th scope="col">Name</th>
-                <th scope="col">Date</th>
-                <th scope="col">Amount</th>
-                <th scope="col">Category</th>
-                <th scope="col">Account</th>
-            </tr>
-            </thead>
-            <tbody>
-            {% for plaid_item in all_plaid_transactions %}
-                {% set item_id = plaid_item["item_id"] %}
-                {% for transaction in plaid_item["transactions"] %}
+                    </thead>
+                    <tbody>
+                        {% set net_worth = namespace(value=0) %}
+                        {% for account in all_plaid_accounts %}
+                            {% if account["account_id"] is not none %}
+                                {% set account_name = account["official_name"] %}
+                                {% if account["official_name"] is none %}
+                                    {% set account_name = account["name"] %}
+                                {% endif %}
+                                {% do accounts_map.update({account["account_id"]: account_name }) %}
+                                <tr>
+                                    <td>{{ account_name }} - {{ account["mask"] }}</td>
+                                    <td>{{ account["type"] }}</td>
+                                    <td>{{ account["subtype"] }}</td>
+                                    <td>
+                                        {% if account["type"] == "credit" %}
+                                            {{ account["balances"]["current"] * -1 }}
+                                            {% set net_worth.value = net_worth.value - account["balances"]["current"] %}
+                                            / {{ account["balances"]["limit"] }}
+                                        {% else %}
+                                            {{ account["balances"]["current"] }}
+                                            {% set net_worth.value = net_worth.value + account["balances"]["current"] %}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
                     <tr>
-                        <td>{{ transaction["name"] }}</td>
-                        <td>{{ transaction["date"] }}</td>
-                        <td>{{ transaction["amount"] }}</td>
-                        <td>{{ transaction["category"] | join(", ") }}</td>
-                        <td>{{ accounts_map[transaction["account_id"]] }}</td>
+                        <td><b>Net worth</b></td>
+                        <td></td>
+                        <td></td>
+                        <td><b>{{ net_worth.value | round }}</b></td>
                     </tr>
-                {% endfor %}
-            {% endfor %}
-            </tbody>
-        </table>
+                </table>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="transactions-table" width="100%" cellspacing="0">
+                    <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Category</th>
+                        <th scope="col">Account</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for plaid_item in all_plaid_transactions %}
+                        {% set item_id = plaid_item["item_id"] %}
+                        {% for transaction in plaid_item["transactions"] %}
+                            <tr>
+                                <td>{{ transaction["name"] }}</td>
+                                <td>{{ transaction["date"] }}</td>
+                                <td>{{ transaction["amount"] * -1 }}</td>
+                                <td>{{ transaction["category"] | join(", ") }}</td>
+                                <td>{{ accounts_map[transaction["account_id"]] }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </main>
 

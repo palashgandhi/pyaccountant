@@ -94,7 +94,6 @@ class PlaidAccountant(object):
         all_transactions = []
         for it in self.plaid_items:
             transactions = it.get_transactions(start_date, end_date)
-            # import pdb; pdb.set_trace()
             transactions["item_id"] = it.item_id
             all_transactions.append(transactions)
         return all_transactions
