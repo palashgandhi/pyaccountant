@@ -74,7 +74,7 @@
                     </thead>
                     <tbody>
                     {% for plaid_item in all_plaid_transactions %}
-                        {% set item_id = plaid_item["item_id"] %}
+                        {% set item_id = plaid_item["item"]["item_id"] %}
                         {% for transaction in plaid_item["transactions"] %}
                             <tr>
                                 <td>{{ transaction["name"] }}</td>

@@ -1,0 +1,3 @@
+include src/pyaccountant/defaults.ini
+recursive-include src/pyaccountant/static *
+recursive-include src/pyaccountant/templates *

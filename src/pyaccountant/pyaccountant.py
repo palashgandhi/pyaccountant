@@ -4,7 +4,7 @@ import flask
 
 from pyaccountant.third_party.plaid import client
 
-app = flask.Flask(__name__)
+app = flask.Flask(__name__, template_folder="templates")
 app.jinja_env.add_extension("jinja2.ext.do")
 
 

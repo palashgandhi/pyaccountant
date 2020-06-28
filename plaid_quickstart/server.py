@@ -5,7 +5,10 @@ import os
 import time
 
 import plaid
-from flask import Flask, jsonify, render_template, request
+from flask import Flask
+from flask import jsonify
+from flask import render_template
+from flask import request
 
 app = Flask(__name__)
 

@@ -1,0 +1,21 @@
+exclude: >
+  (?x)^(
+    ^src/pyaccountant/third_party/.*|
+  )$
+
+repos:
+- repo: https://github.com/psf/black
+  rev: stable
+  hooks:
+    - id: black
+
+- repo: https://github.com/pycqa/flake8
+  rev: 3.8.3
+  hooks:
+    - id: flake8
+      additional_dependencies: [flake8-colors]
+
+- repo: https://github.com/timothycrosley/isort
+  rev: 4.3.21
+  hooks:
+    - id: isort
